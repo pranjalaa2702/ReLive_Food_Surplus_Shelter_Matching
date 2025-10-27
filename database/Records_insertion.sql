@@ -1,0 +1,188 @@
+INSERT INTO Donor (donor_name, email, phone, address, donor_type)
+VALUES
+('Ravi Kumar', 'ravi.k@example.com', '9876543210', 'Koramangala, Bangalore', 'Organization'),
+('Asha Mehta', 'asha.m@example.com', '9890011223', 'Indiranagar, Bangalore', 'NGO'),
+('John Dsouza', 'john.d@example.com', '9812345678', 'Whitefield, Bangalore', 'Individual'),
+('Priya Nair', 'priya.n@example.com', '9822233445', 'BTM Layout, Bangalore', 'Organization'),
+('Amit Verma', 'amit.v@example.com', '9998877665', 'Jayanagar, Bangalore', 'Individual'),
+('Kiran Patil', 'kiran.p@example.com', '9820023344', 'HSR Layout, Bangalore', 'Retail Store'),
+('Leena Joseph', 'leena.j@example.com', '9811765432', 'Electronic City, Bangalore', 'NGO'),
+('Mohammed Ali', 'm.ali@example.com', '9876001122', 'KR Puram, Bangalore', 'Restaurant'),
+('Rohit Sinha', 'rohit.s@example.com', '9833445566', 'JP Nagar, Bangalore', 'Individual'),
+('Anjali Sharma', 'anjali.s@example.com', '9800112233', 'Yelahanka, Bangalore', 'Individual'),
+('Vinod Gupta', 'vinod.g@example.com', '9887766554', 'Koramangala, Bangalore', 'Corporate'),
+('Sneha Reddy', 'sneha.r@example.com', '9819876543', 'Indiranagar, Bangalore', 'Individual'),
+('Deepak Rao', 'deepak.r@example.com', '9898899001', 'RT Nagar, Bangalore', 'NGO'),
+('Farhan Khan', 'farhan.k@example.com', '9822244455', 'Hebbal, Bangalore', 'Individual'),
+('Pooja Menon', 'pooja.m@example.com', '9833556677', 'Banashankari, Bangalore', 'Organization'),
+('Vikas Jain', 'vikas.j@example.com', '9844667788', 'Vijayanagar, Bangalore', 'Retail Store'),
+('Aditi Shah', 'aditi.s@example.com', '9898001122', 'Ulsoor, Bangalore', 'Individual'),
+('Manish Agarwal', 'manish.a@example.com', '9888776655', 'Richmond Town, Bangalore', 'Corporate'),
+('Tanya George', 'tanya.g@example.com', '9811223344', 'BTM Layout, Bangalore', 'Individual'),
+('Harish Iyer', 'harish.i@example.com', '9829988776', 'Hebbal, Bangalore', 'Organization');
+
+
+INSERT INTO Shelter (shelter_name, email, phone, location, capacity, current_occupancy, food_stock_status)
+VALUES
+('Grace Shelter', 'grace.shelter@example.com', '080-22223333', 'Koramangala, Bangalore', 50, 35, 'Adequate'),
+('Hope Haven', 'hope.haven@example.com', '080-22998877', 'Indiranagar, Bangalore', 60, 40, 'Low'),
+('Sunrise Home', 'sunrise.home@example.com', '080-22334455', 'Whitefield, Bangalore', 45, 42, 'Adequate'),
+('CarePoint', 'carepoint@example.com', '080-24556677', 'Marathahalli, Bangalore', 55, 37, 'Adequate'),
+('NewLife Shelter', 'newlife.shelter@example.com', '080-33445566', 'BTM Layout, Bangalore', 70, 65, 'Low'),
+('Helping Arms', 'helping.arms@example.com', '080-28889977', 'Jayanagar, Bangalore', 65, 48, 'Adequate'),
+('SafeNest', 'safenest@example.com', '080-30004455', 'HSR Layout, Bangalore', 50, 43, 'Low'),
+('Peace Home', 'peace.home@example.com', '080-26667788', 'Electronic City, Bangalore', 60, 45, 'Adequate'),
+('Joy Abode', 'joy.abode@example.com', '080-25558899', 'Malleshwaram, Bangalore', 40, 32, 'Adequate'),
+('WarmHearts', 'warmhearts@example.com', '080-31223344', 'JP Nagar, Bangalore', 75, 70, 'Low'),
+('Unity Shelter', 'unity.shelter@example.com', '080-34556688', 'Yelahanka, Bangalore', 80, 75, 'Adequate'),
+('KindHome', 'kindhome@example.com', '080-29991122', 'KR Puram, Bangalore', 55, 50, 'Adequate'),
+('Haven Home', 'haven.home@example.com', '080-25559900', 'Banashankari, Bangalore', 70, 62, 'Low'),
+('Compassion Care', 'compassion.care@example.com', '080-22339944', 'Richmond Town, Bangalore', 60, 55, 'Adequate'),
+('Home of Hope', 'homeofhope@example.com', '080-24447711', 'RT Nagar, Bangalore', 45, 40, 'Adequate'),
+('BrightFuture', 'brightfuture@example.com', '080-34456677', 'Vijayanagar, Bangalore', 85, 79, 'Low'),
+('Faith Shelter', 'faith.shelter@example.com', '080-29998877', 'Koramangala, Bangalore', 50, 44, 'Adequate'),
+('Healing Hands', 'healing.hands@example.com', '080-26773344', 'Ulsoor, Bangalore', 60, 50, 'Low'),
+('Refuge Home', 'refuge.home@example.com', '080-25665544', 'Bannerghatta, Bangalore', 65, 58, 'Adequate'),
+('Heart Haven', 'heart.haven@example.com', '080-27774455', 'Hebbal, Bangalore', 70, 65, 'Low');
+
+INSERT INTO Volunteer (volunteer_name, email, phone, area_of_service)
+VALUES
+('Sanjay Rao', 'sanjay.r@example.com', '9877001122', 'Koramangala'),
+('Neha Gupta', 'neha.g@example.com', '9822113344', 'Indiranagar'),
+('Arjun Nair', 'arjun.n@example.com', '9811887766', 'Whitefield'),
+('Divya Pillai', 'divya.p@example.com', '9833001122', 'HSR Layout'),
+('Karthik Iyer', 'karthik.i@example.com', '9898334455', 'Jayanagar'),
+('Preeti Joshi', 'preeti.j@example.com', '9822776655', 'BTM Layout'),
+('Anand Kumar', 'anand.k@example.com', '9888999001', 'Electronic City'),
+('Ritika Sen', 'ritika.s@example.com', '9811445566', 'Marathahalli'),
+('Rohan Mehta', 'rohan.m@example.com', '9833447788', 'JP Nagar'),
+('Snehal Patel', 'snehal.p@example.com', '9899776655', 'Yelahanka'),
+('Vivek Deshmukh', 'vivek.d@example.com', '9812334455', 'KR Puram'),
+('Kavya Rao', 'kavya.r@example.com', '9822889900', 'RT Nagar'),
+('Rahul Shetty', 'rahul.s@example.com', '9877665544', 'Koramangala'),
+('Asha Patel', 'asha.p@example.com', '9899001122', 'Hebbal'),
+('Anita Sharma', 'anita.s@example.com', '9800223344', 'Banashankari'),
+('Ramesh Bhat', 'ramesh.b@example.com', '9811999888', 'Ulsoor'),
+('Vani Krishnan', 'vani.k@example.com', '9877555444', 'Vijayanagar'),
+('Meera D', 'meera.d@example.com', '9888223344', 'Richmond Town'),
+('Harsha Gowda', 'harsha.g@example.com', '9822211333', 'BTM Layout'),
+('Tina Francis', 'tina.f@example.com', '9833778899', 'HSR Layout');
+
+
+INSERT INTO Donation (donor_id, food_type, quantity, expiry_date, location)
+VALUES
+(1, 'Cooked Rice', 50, '2025-10-30', 'Koramangala'),
+(2, 'Vegetable Curry', 40, '2025-10-30', 'Indiranagar'),
+(3, 'Bread Packets', 100, '2025-11-01', 'Whitefield'),
+(4, 'Bottled Water', 200, '2025-11-10', 'BTM Layout'),
+(5, 'Biscuits', 300, '2025-12-15', 'Jayanagar'),
+(6, 'Fruit Boxes', 50, '2025-10-29', 'HSR Layout'),
+(7, 'Milk Cartons', 80, '2025-10-31', 'Electronic City'),
+(8, 'Dry Snacks', 120, '2025-11-02', 'KR Puram'),
+(9, 'Vegetable Rice', 60, '2025-10-30', 'JP Nagar'),
+(10, 'Bread Rolls', 90, '2025-11-01', 'Yelahanka'),
+(11, 'Pasta Meals', 45, '2025-10-29', 'Koramangala'),
+(12, 'Canned Beans', 70, '2025-12-30', 'Indiranagar'),
+(13, 'Ready Meals', 65, '2025-11-03', 'RT Nagar'),
+(14, 'Drinking Water', 250, '2025-11-15', 'Hebbal'),
+(15, 'Salads', 40, '2025-10-29', 'Banashankari'),
+(16, 'Bread Loaves', 100, '2025-11-01', 'Vijayanagar'),
+(17, 'Dal Curry', 50, '2025-10-30', 'Ulsoor'),
+(18, 'Soup Packets', 75, '2025-11-05', 'Richmond Town'),
+(19, 'Sandwiches', 90, '2025-11-02', 'BTM Layout'),
+(20, 'Cookies', 200, '2025-12-20', 'HSR Layout');
+
+
+INSERT INTO Request (shelter_id, request_type, quantity_needed, urgency_level)
+VALUES
+(1, 'Cooked Rice', 30, 'High'),
+(2, 'Vegetable Curry', 25, 'Medium'),
+(3, 'Bread Packets', 60, 'High'),
+(4, 'Bottled Water', 100, 'Low'),
+(5, 'Biscuits', 50, 'Medium'),
+(6, 'Fruit Boxes', 30, 'High'),
+(7, 'Milk Cartons', 40, 'Medium'),
+(8, 'Dry Snacks', 60, 'High'),
+(9, 'Vegetable Rice', 30, 'High'),
+(10, 'Bread Rolls', 40, 'Low'),
+(11, 'Pasta Meals', 25, 'Medium'),
+(12, 'Canned Beans', 35, 'High'),
+(13, 'Ready Meals', 40, 'Medium'),
+(14, 'Drinking Water', 150, 'High'),
+(15, 'Salads', 20, 'Medium'),
+(16, 'Bread Loaves', 60, 'High'),
+(17, 'Dal Curry', 35, 'Medium'),
+(18, 'Soup Packets', 40, 'High'),
+(19, 'Sandwiches', 45, 'Medium'),
+(20, 'Cookies', 80, 'Low');
+
+
+INSERT INTO Matches (donation_id, request_id, volunteer_id, status)
+VALUES
+(1, 1, 1, 'Delivered'),
+(2, 2, 2, 'In Progress'),
+(3, 3, 3, 'Delivered'),
+(4, 4, 4, 'Delivered'),
+(5, 5, 5, 'In Progress'),
+(6, 6, 6, 'Delivered'),
+(7, 7, 7, 'Delivered'),
+(8, 8, 8, 'In Progress'),
+(9, 9, 9, 'Delivered'),
+(10, 10, 10, 'In Progress'),
+(11, 11, 11, 'Delivered'),
+(12, 12, 12, 'Delivered'),
+(13, 13, 13, 'In Progress'),
+(14, 14, 14, 'Delivered'),
+(15, 15, 15, 'Delivered'),
+(16, 16, 16, 'In Progress'),
+(17, 17, 17, 'Delivered'),
+(18, 18, 18, 'Delivered'),
+(19, 19, 19, 'In Progress'),
+(20, 20, 20, 'Delivered');
+
+INSERT INTO AuditLog (user_role, action_type, record_id, table_name, description)
+VALUES
+('Donor', 'Donation Created', 1, 'donation', 'Added donation of 50 Cooked Rice'),
+('System', 'Donation Matched', 1, 'matches', 'Matched with Grace Shelter'),
+('Shelter', 'Request Fulfilled', 2, 'request', 'Delivered Vegetable Curry'),
+('Admin', 'Volunteer Assigned', 3, 'volunteer', 'Assigned to Request 3'),
+('Shelter', 'Request Closed', 3, 'request', 'Bread Packets Delivered'),
+('Donor', 'Donation Pending', 4, 'donation', 'Awaiting Volunteer'),
+('System', 'Request Matched', 4, 'matches', 'Milk Cartons linked to SafeNest'),
+('Admin', 'Volunteer Assigned', 5, 'volunteer', 'Assigned to Electronic City area'),
+('Volunteer', 'Donation Delivered', 5, 'donation', 'Dry Snacks delivered'),
+('Admin', 'Audit Created', 6, 'auditlog', 'System log entry'),
+('Donor', 'Donation Created', 7, 'donation', 'Added Biscuits 300 qty'),
+('Shelter', 'Request Closed', 7, 'request', 'Bread Rolls received'),
+('Admin', 'Volunteer Assigned', 8, 'volunteer', 'Assigned to Koramangala route'),
+('System', 'Donation Matched', 8, 'matches', 'Canned Beans allocated'),
+('Volunteer', 'Delivery Done', 9, 'donation', 'Soup Packets delivered'),
+('Admin', 'Audit Log', 10, 'auditlog', 'Routine update'),
+('Shelter', 'Request Closed', 10, 'request', 'Dal Curry completed'),
+('Donor', 'Donation Created', 11, 'donation', 'Ready Meals recorded'),
+('Admin', 'Volunteer Assigned', 11, 'volunteer', 'Richmond Town delivery'),
+('Volunteer', 'Donation Delivered', 12, 'donation', 'Cookies delivered successfully');
+
+INSERT INTO recipient (recipient_name, age, gender, shelter_id)
+VALUES
+('Aarav Kumar', 8, 'Male', 1),
+('Meera Iyer', 12, 'Female', 2),
+('Rohan Das', 10, 'Male', 3),
+('Sana Sheikh', 14, 'Female', 4),
+('Vikram Singh', 9, 'Male', 5),
+('Ananya Gupta', 11, 'Female', 6),
+('Karan Patel', 13, 'Male', 7),
+('Diya Nair', 15, 'Female', 8),
+('Arjun Reddy', 10, 'Male', 9),
+('Isha Sharma', 12, 'Female', 10),
+('Tanishq Mehta', 16, 'Male', 11),
+('Pooja Das', 11, 'Female', 12),
+('Ritesh Verma', 9, 'Male', 13),
+('Simran Ali', 13, 'Female', 14),
+('Kabir Rao', 14, 'Male', 15),
+('Sneha George', 10, 'Female', 16),
+('Rahul Jain', 8, 'Male', 17),
+('Aditi Pillai', 12, 'Female', 18),
+('Mohit Sharma', 15, 'Male', 19),
+('Tara Dsouza', 13, 'Female', 20);
+
