@@ -1,13 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, Users, Heart, TrendingUp, Clock, CheckCircle, LogOut } from "lucide-react";
+import { Package, Heart, TrendingUp, Clock, LogOut, Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-const Dashboard = () => {
+const DonorDashboard = () => {
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -18,11 +18,12 @@ const Dashboard = () => {
       toast.error("Logout failed. Please try again.");
     }
   };
-  const userStats = [
+
+  const donorStats = [
     { icon: Package, label: "Total Donations", value: "24", color: "text-primary" },
-    { icon: Users, label: "Volunteer Hours", value: "48", color: "text-secondary" },
-    { icon: Heart, label: "Meals Provided", value: "360", color: "text-accent" },
+    { icon: Heart, label: "Meals Provided", value: "360", color: "text-red-600" },
     { icon: TrendingUp, label: "Impact Score", value: "952", color: "text-green-600" },
+    { icon: Clock, label: "Active Requests", value: "8", color: "text-blue-600" },
   ];
 
   const recentDonations = [
@@ -52,51 +53,14 @@ const Dashboard = () => {
     },
   ];
 
-  const upcomingVolunteerTasks = [
-    {
-      id: 1,
-      title: "Food Distribution Helper",
-      location: "Downtown Community Center",
-      date: "Tomorrow, 9:00 AM",
-      duration: "3 hours",
-    },
-    {
-      id: 2,
-      title: "Meal Preparation Assistant",
-      location: "Hope Kitchen",
-      date: "Friday, 5:00 PM",
-      duration: "3 hours",
-    },
-  ];
-
-  const matches = [
-    {
-      id: 1,
-      donor: "Green Grocery Store",
-      recipient: "Hope Community Shelter",
-      items: "Fresh vegetables, 75 kg",
-      status: "Pending Confirmation",
-    },
-    {
-      id: 2,
-      donor: "City Bakery",
-      recipient: "Senior Care Home",
-      items: "Bread and pastries, 50 items",
-      status: "Confirmed",
-    },
-  ];
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Delivered":
-      case "Confirmed":
         return "bg-green-100 text-green-700 border-green-200";
       case "Matched":
         return "bg-blue-100 text-blue-700 border-blue-200";
       case "In Transit":
         return "bg-yellow-100 text-yellow-700 border-yellow-200";
-      case "Pending Confirmation":
-        return "bg-orange-100 text-orange-700 border-orange-200";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -112,23 +76,29 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="font-heading font-bold text-4xl text-foreground mb-2">
-                Welcome Back, {user?.name || user?.email || 'User'}!
+                Donor Dashboard
               </h1>
               <p className="text-muted-foreground text-lg">
-                Here's your impact summary and recent activity
+                Manage your donations and track your impact
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                New Donation
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Badge variant="secondary">{user?.role?.toUpperCase()}</Badge>
+            <Badge variant="secondary">DONOR</Badge>
             <span>•</span>
             <span>{user?.email}</span>
           </div>
@@ -136,7 +106,7 @@ const Dashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {userStats.map((stat, index) => (
+          {donorStats.map((stat, index) => (
             <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow">
               <stat.icon className={`h-10 w-10 ${stat.color} mx-auto mb-3`} />
               <div className="font-heading font-bold text-3xl text-foreground mb-1">
@@ -180,59 +150,33 @@ const Dashboard = () => {
             </div>
           </Card>
 
-          {/* Upcoming Volunteer Tasks */}
+          {/* Quick Actions */}
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-heading font-semibold text-2xl text-foreground">
-                Upcoming Tasks
+                Quick Actions
               </h2>
-              <Button variant="ghost" size="sm">View All</Button>
             </div>
             <div className="space-y-4">
-              {upcomingVolunteerTasks.map((task) => (
-                <div key={task.id} className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <h3 className="font-medium text-foreground mb-2">{task.title}</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground mb-3">
-                    <p>📍 {task.location}</p>
-                    <p>📅 {task.date}</p>
-                    <p>⏱️ {task.duration}</p>
-                  </div>
-                  <Button size="sm" className="w-full">
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Mark as Complete
-                  </Button>
-                </div>
-              ))}
+              <Button className="w-full justify-start" variant="outline">
+                <Package className="h-4 w-4 mr-2" />
+                Donate Food Items
+              </Button>
+              <Button className="w-full justify-start" variant="outline">
+                <Heart className="h-4 w-4 mr-2" />
+                Schedule Pickup
+              </Button>
+              <Button className="w-full justify-start" variant="outline">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                View Impact Report
+              </Button>
+              <Button className="w-full justify-start" variant="outline">
+                <Clock className="h-4 w-4 mr-2" />
+                Track Deliveries
+              </Button>
             </div>
           </Card>
         </div>
-
-        {/* Matches Section */}
-        <Card className="p-6 mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-heading font-semibold text-2xl text-foreground">
-              Current Matches
-            </h2>
-            <Button variant="ghost" size="sm">View All</Button>
-          </div>
-          <div className="space-y-4">
-            {matches.map((match) => (
-              <div key={match.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-medium text-foreground">{match.donor}</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="font-medium text-foreground">{match.recipient}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{match.items}</p>
-                </div>
-                <Badge className={getStatusColor(match.status)}>
-                  {match.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </Card>
       </main>
 
       <Footer />
@@ -240,4 +184,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DonorDashboard;

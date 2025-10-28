@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Auth = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, register, user } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({
     name: "",
@@ -18,13 +23,53 @@ const Auth = () => {
     confirmPassword: "",
     role: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Login successful! Redirecting to dashboard...");
+  // Redirect if already authenticated
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  // Get role-specific dashboard path
+  const getRoleDashboard = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return '/admin';
+      case 'donor':
+        return '/donor-dashboard';
+      case 'volunteer':
+        return '/volunteer-dashboard';
+      case 'shelter':
+        return '/shelter-dashboard';
+      case 'recipient':
+        return '/recipient-dashboard';
+      default:
+        return '/dashboard';
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const success = await login(loginData.email, loginData.password);
+      if (success) {
+        // Get user role from auth context to determine redirect
+        const userRole = user?.role || localStorage.getItem('userRole') || 'user';
+        const roleDashboard = getRoleDashboard(userRole);
+        toast.success("Login successful! Redirecting to your dashboard...");
+        navigate(roleDashboard, { replace: true });
+      } else {
+        toast.error("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ===== REGISTER =====
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (registerData.password !== registerData.confirmPassword) {
       toast.error("Passwords do not match!");
@@ -34,7 +79,30 @@ const Auth = () => {
       toast.error("Please select your role");
       return;
     }
-    toast.success("Registration successful! Welcome to FoodShare Connect!");
+
+    setIsLoading(true);
+
+    try {
+      const success = await register(
+        registerData.name,
+        registerData.email,
+        registerData.password,
+        registerData.role
+      );
+      
+      if (success) {
+        // Redirect to role-specific dashboard
+        const roleDashboard = getRoleDashboard(registerData.role);
+        toast.success("Registration successful! Welcome to FoodShare Connect!");
+        navigate(roleDashboard, { replace: true });
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -87,8 +155,8 @@ const Auth = () => {
                 </a>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Login
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
           </TabsContent>
@@ -163,8 +231,8 @@ const Auth = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Create Account
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
           </TabsContent>

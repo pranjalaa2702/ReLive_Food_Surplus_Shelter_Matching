@@ -1,0 +1,36 @@
+{
+  "name": "relive_food_surplus_shelter_matching",
+  "version": "1.0.0",
+  "description": "**ReLive** is a community-driven **Food & Shelter Redistribution Platform** built using **TypeScript** and **Vite**.  \r It bridges the gap between **donors**, **volunteers**, **shelters**, and **recipients**, ensuring surplus food and essential resources are efficiently distributed to those in need.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./backend/server.js",
+    "start": "node ./backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranjalaa2702/ReLive_Food_Surplus_Shelter_Matching.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pranjalaa2702/ReLive_Food_Surplus_Shelter_Matching/issues"
+  },
+  "homepage": "https://github.com/pranjalaa2702/ReLive_Food_Surplus_Shelter_Matching#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.15.3",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
