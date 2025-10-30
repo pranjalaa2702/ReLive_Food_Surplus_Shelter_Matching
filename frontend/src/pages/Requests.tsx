@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,77 +7,55 @@ import { Input } from "@/components/ui/input";
 import { Search, MapPin, Calendar, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 const Requests = () => {
   const [urgencyFilter, setUrgencyFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  const requests = [
-    {
-      id: 1,
-      shelter: "Hope Community Shelter",
-      type: "Fresh Produce",
-      quantity: "100 kg",
-      urgency: "urgent",
-      location: "Brigade Road",
-      date: "Needed by: Today",
-      description: "Running low on fresh vegetables for evening meal service",
-    },
-    {
-      id: 2,
-      shelter: "Family Support Center",
-      type: "Canned Goods",
-      quantity: "200 items",
-      urgency: "high",
-      location: "Bannerghatta Road",
-      date: "Needed by: Tomorrow",
-      description: "Restocking pantry for weekly family distributions",
-    },
-    {
-      id: 3,
-      shelter: "Senior Care Home",
-      type: "Dairy Products",
-      quantity: "50 liters",
-      urgency: "medium",
-      location: "Bellary Road (NH 44)",
-      date: "Needed by: This Week",
-      description: "Milk, yogurt, and cheese for senior residents",
-    },
-    {
-      id: 4,
-      shelter: "Youth Transition House",
-      type: "Prepared Meals",
-      quantity: "75 meals",
-      urgency: "urgent",
-      location: "Sarjapur Road",
-      date: "Needed by: Today",
-      description: "Ready-to-eat meals for transitioning youth",
-    },
-    {
-      id: 5,
-      shelter: "Community Kitchen",
-      type: "Bakery Items",
-      quantity: "150 items",
-      urgency: "low",
-      location: "Koramangala 80 Feet Road",
-      date: "Needed by: Next Week",
-      description: "Bread, rolls, and pastries for meal programs",
-    },
-    {
-      id: 6,
-      shelter: "Emergency Relief Station",
-      type: "Meat & Protein",
-      quantity: "80 kg",
-      urgency: "high",
-      location: "Indiranagar 100 Feet Road",
-      date: "Needed by: Tomorrow",
-      description: "Protein sources for emergency meal preparation",
-    },
-  ];
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE}/api/requests`);
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) {
+          // Likely hitting index.html due to bad base URL; fail silently with empty list
+          setRequests([]);
+          setError(null);
+        } else {
+          const data = await res.json();
+          if (!res.ok) {
+            // treat as empty rather than surfacing error
+            setRequests([]);
+            setError(null);
+          } else {
+            setRequests(data.requests || []);
+            setError(null);
+          }
+        }
+      } catch {
+        // network/parse error: stay silent and show nothing
+        setRequests([]);
+        setError(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRequests();
+  }, []);
 
   const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
+    switch ((urgency || '').toLowerCase()) {
       case "urgent":
         return "bg-red-100 text-red-700 border-red-200";
       case "high":
@@ -89,6 +67,35 @@ const Requests = () => {
       default:
         return "bg-muted text-muted-foreground";
     }
+  };
+
+  const filtered = requests.filter((r) => {
+    // Hide fulfilled requests unless explicitly searching for them
+    if (r.status === 'Fulfilled') return false;
+    
+    const matchesUrgency = urgencyFilter === "all" || (r.urgency_level || '').toLowerCase() === urgencyFilter;
+    const matchesType = typeFilter === "all" || (r.request_type || '').toLowerCase().includes(typeFilter);
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q || (r.shelter_name || '').toLowerCase().includes(q) || (r.request_type || '').toLowerCase().includes(q);
+    return matchesUrgency && matchesType && matchesSearch;
+  });
+
+  const onFulfill = (r: any) => {
+    if (!isAuthenticated) {
+      navigate('/auth?tab=register');
+      return;
+    }
+    // Filter out fulfilled requests from being clickable
+    if (r.status === 'Fulfilled') {
+      return;
+    }
+    const params = new URLSearchParams({ 
+      shelter: r.shelter_name || '', 
+      type: r.request_type || '', 
+      quantity: r.quantity || '',
+      unit: r.unit || ''
+    });
+    navigate(`/requests/${r.request_id}/fulfill?${params.toString()}`);
   };
 
   return (
@@ -103,7 +110,7 @@ const Requests = () => {
             Current Requests
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            View active requests from shelters and recipients. Help fulfill urgent needs in your community.
+            Shelters in need are requesting food donations. Browse requests and make a donation to help your community.
           </p>
         </div>
 
@@ -148,43 +155,51 @@ const Requests = () => {
           </div>
         </Card>
 
-        {/* Requests Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {requests.map((request) => (
-            <Card key={request.id} className="p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <h3 className="font-heading font-semibold text-xl text-foreground">
-                  {request.shelter}
-                </h3>
-                <Badge className={getUrgencyColor(request.urgency)}>
-                  {request.urgency.toUpperCase()}
-                </Badge>
-              </div>
-
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-foreground font-medium">{request.type}</span>
-                  <span className="text-muted-foreground">• {request.quantity}</span>
+        {loading ? null : filtered.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((request) => (
+              <Card key={request.request_id} className="p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-heading font-semibold text-xl text-foreground">
+                    {request.shelter_name}
+                  </h3>
+                  <Badge className={getUrgencyColor(request.urgency_level)}>
+                    {(request.urgency_level || '').toUpperCase()}
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  {request.location}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  {request.date}
-                </div>
-              </div>
 
-              <p className="text-sm text-muted-foreground mb-4">
-                {request.description}
-              </p>
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground font-medium">{request.request_type}</span>
+                    <span className="text-muted-foreground">• {request.quantity} {request.unit}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(request.requested_at).toLocaleString()}
+                  </div>
+                  {request.status && request.status !== 'Open' && (
+                    <Badge variant="outline">
+                      {request.status}
+                    </Badge>
+                  )}
+                </div>
 
-              <Button className="w-full">Fulfill Request</Button>
-            </Card>
-          ))}
-        </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {request.description}
+                </p>
+
+                <Button 
+                  className="w-full" 
+                  onClick={() => onFulfill(request)}
+                  disabled={request.status === 'Fulfilled'}
+                >
+                  {request.status === 'Fulfilled' ? 'Fulfilled' : 'Donate to Fulfill'}
+                </Button>
+              </Card>
+            ))}
+          </div>
+        ) : null}
       </main>
 
       <Footer />

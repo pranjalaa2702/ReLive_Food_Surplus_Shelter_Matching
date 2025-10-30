@@ -6,18 +6,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
-import Donate from "./pages/Donate";
 import Requests from "./pages/Requests";
 import Volunteer from "./pages/Volunteer";
 import Shelters from "./pages/Shelters";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
 import DonorDashboard from "./pages/DonorDashboard";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
 import ShelterDashboard from "./pages/ShelterDashboard";
-import RecipientDashboard from "./pages/RecipientDashboard";
 import NotFound from "./pages/NotFound";
+import FulfillRequest from "./pages/FulfillRequest";
 
 const queryClient = new QueryClient();
 
@@ -30,21 +28,13 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/donate" element={<Donate />} />
             <Route path="/requests" element={<Requests />} />
+            <Route path="/requests/:id/fulfill" element={<ProtectedRoute unauthenticatedRedirectTo="/auth"><FulfillRequest /></ProtectedRoute>} />
             <Route path="/volunteer" element={<Volunteer />} />
             <Route path="/shelters" element={<Shelters />} />
             <Route path="/auth" element={<Auth />} />
             
             {/* Role-specific protected routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
             <Route 
               path="/admin" 
               element={
@@ -74,14 +64,6 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="shelter">
                   <ShelterDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/recipient-dashboard" 
-              element={
-                <ProtectedRoute requiredRole="recipient">
-                  <RecipientDashboard />
                 </ProtectedRoute>
               } 
             />

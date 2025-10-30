@@ -16,10 +16,10 @@ const Home = () => {
 
   const features = [
     {
-      title: "Donate Surplus Food",
-      description: "Share your excess food with those in need. Post available donations and connect with local shelters.",
+      title: "Fulfill Requests",
+      description: "Browse shelter requests and make donations to fulfill urgent community needs.",
       icon: Package,
-      link: "/donate",
+      link: "/requests",
     },
     {
       title: "Volunteer Your Time",
@@ -28,8 +28,8 @@ const Home = () => {
       link: "/volunteer",
     },
     {
-      title: "Request Assistance",
-      description: "Shelters and recipients can request food and supplies based on urgent needs.",
+      title: "Submit Requests",
+      description: "Shelters can submit requests for food and supplies based on urgent needs.",
       link: "/requests",
       icon: Heart,
     },
@@ -56,10 +56,10 @@ const Home = () => {
             Connecting donors, shelters, and volunteers to end food waste and support communities in need.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/donate">
+            <Link to="/requests">
               <Button size="lg" className="text-lg px-8 h-14 shadow-lg hover:shadow-xl transition-shadow">
                 <Package className="mr-2 h-5 w-5" />
-                Donate Now
+                Browse Requests
               </Button>
             </Link>
             <Link to="/volunteer">

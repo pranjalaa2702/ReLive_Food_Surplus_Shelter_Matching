@@ -22,11 +22,21 @@ const Auth = () => {
     password: "",
     confirmPassword: "",
     role: "",
+    // shelter-only
+    shelter_name: "",
+    phone: "",
+    location: "",
+    capacity: "",
+    current_occupancy: "",
+    food_stock_status: "Adequate",
+    // donor-only
+    address: "",
+    donor_type: "",
+    // volunteer-only
+    area_of_service: "",
+    availability_status: "Available",
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  // Redirect if already authenticated
-  const from = location.state?.from?.pathname || "/dashboard";
 
   // Get role-specific dashboard path
   const getRoleDashboard = (role: string) => {
@@ -39,10 +49,8 @@ const Auth = () => {
         return '/volunteer-dashboard';
       case 'shelter':
         return '/shelter-dashboard';
-      case 'recipient':
-        return '/recipient-dashboard';
       default:
-        return '/dashboard';
+        return '/';
     }
   };
 
@@ -80,14 +88,51 @@ const Auth = () => {
       return;
     }
 
+    if (registerData.role === 'shelter' && !registerData.shelter_name) {
+      toast.error("Please enter shelter name");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      const payload: any = {
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        role: registerData.role,
+      };
+      if (registerData.role === 'shelter') {
+        payload.shelter_name = registerData.shelter_name;
+        payload.phone = registerData.phone;
+        payload.location = registerData.location;
+        payload.capacity = registerData.capacity;
+        payload.current_occupancy = registerData.current_occupancy;
+        payload.food_stock_status = registerData.food_stock_status;
+      }
+
+      console.log('Register data before sending:', registerData);
+      console.log('Payload constructed:', payload);
+
       const success = await register(
-        registerData.name,
-        registerData.email,
-        registerData.password,
-        registerData.role
+        payload.name,
+        payload.email,
+        payload.password,
+        payload.role,
+        registerData.role === 'shelter'
+          ? { 
+              shelter_name: payload.shelter_name, 
+              phone: payload.phone, 
+              location: payload.location, 
+              capacity: payload.capacity,
+              current_occupancy: payload.current_occupancy,
+              food_stock_status: payload.food_stock_status
+            }
+          : registerData.role === 'donor'
+          ? { phone: registerData.phone, address: (registerData as any).address, donor_type: (registerData as any).donor_type }
+          : registerData.role === 'volunteer'
+          ? { phone: registerData.phone, area_of_service: (registerData as any).area_of_service, availability_status: (registerData as any).availability_status }
+          : undefined
       );
       
       if (success) {
@@ -202,10 +247,146 @@ const Auth = () => {
                     <SelectItem value="donor">Donor</SelectItem>
                     <SelectItem value="volunteer">Volunteer</SelectItem>
                     <SelectItem value="shelter">Shelter/Organization</SelectItem>
-                    <SelectItem value="recipient">Recipient</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {registerData.role === 'shelter' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-shelter-name">Shelter Name</Label>
+                    <Input
+                      id="register-shelter-name"
+                      type="text"
+                      placeholder="Hope Community Shelter"
+                      value={registerData.shelter_name}
+                      onChange={(e) => setRegisterData({ ...registerData, shelter_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-shelter-phone">Phone</Label>
+                    <Input
+                      id="register-shelter-phone"
+                      type="text"
+                      placeholder="(xxx) xxx-xxxx"
+                      value={registerData.phone}
+                      onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-shelter-location">Location</Label>
+                    <Input
+                      id="register-shelter-location"
+                      type="text"
+                      placeholder="Address / Area"
+                      value={registerData.location}
+                      onChange={(e) => setRegisterData({ ...registerData, location: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-shelter-capacity">Capacity</Label>
+                    <Input
+                      id="register-shelter-capacity"
+                      type="number"
+                      placeholder="e.g., 60"
+                      value={registerData.capacity}
+                      onChange={(e) => setRegisterData({ ...registerData, capacity: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-shelter-current-occupancy">Current Occupancy</Label>
+                    <Input
+                      id="register-shelter-current-occupancy"
+                      type="number"
+                      placeholder="e.g., 45"
+                      value={registerData.current_occupancy}
+                      onChange={(e) => setRegisterData({ ...registerData, current_occupancy: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-shelter-food-stock">Food Stock Status</Label>
+                    <Select
+                      value={registerData.food_stock_status}
+                      onValueChange={(value) => setRegisterData({ ...registerData, food_stock_status: value })}
+                    >
+                      <SelectTrigger id="register-shelter-food-stock">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Adequate">Adequate</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {registerData.role === 'donor' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-donor-phone">Phone</Label>
+                    <Input
+                      id="register-donor-phone"
+                      type="text"
+                      placeholder="(xxx) xxx-xxxx"
+                      value={registerData.phone}
+                      onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-donor-address">Address</Label>
+                    <Input
+                      id="register-donor-address"
+                      type="text"
+                      placeholder="Street, City"
+                      value={registerData.address}
+                      onChange={(e) => setRegisterData({ ...registerData, address: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-donor-type">Donor Type</Label>
+                    <Select
+                      value={registerData.donor_type}
+                      onValueChange={(value) => setRegisterData({ ...registerData, donor_type: value })}
+                    >
+                      <SelectTrigger id="register-donor-type">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Individual">Individual</SelectItem>
+                        <SelectItem value="Organization">Organization</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {registerData.role === 'volunteer' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-vol-phone">Phone</Label>
+                    <Input
+                      id="register-vol-phone"
+                      type="text"
+                      placeholder="(xxx) xxx-xxxx"
+                      value={registerData.phone}
+                      onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-vol-area">Area of Service</Label>
+                    <Input
+                      id="register-vol-area"
+                      type="text"
+                      placeholder="e.g., Logistics, Distribution"
+                      value={registerData.area_of_service}
+                      onChange={(e) => setRegisterData({ ...registerData, area_of_service: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="register-password">Password</Label>

@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, role: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: string, extra?: Record<string, any>) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -168,14 +168,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: string, extra?: Record<string, unknown>): Promise<boolean> => {
     try {
+      const payload = { name, email, password, role, ...(extra || {}) };
+      console.log('Registration payload being sent to backend:', JSON.stringify(payload, null, 2));
+      
       const response = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();

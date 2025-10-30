@@ -28,6 +28,8 @@ async function register(req, res) {
   try {
     const pool = await getPool();
     const { name, email, password, role } = req.body;
+    console.log('Registration request body:', req.body);
+    
     if (!email || !password || !role) return res.status(400).json({ error: 'email, password, role required' });
 
     // check if user exists
@@ -44,17 +46,41 @@ async function register(req, res) {
 
     // create role-specific profile record to link
     if (role === 'donor') {
-      await pool.query('INSERT INTO Donor (user_id, donor_name, email) VALUES (?, ?, ?)', [userId, name || null, email]);
-    } else if (role === 'volunteer') {
-      await pool.query('INSERT INTO Volunteer (user_id, volunteer_name, email) VALUES (?, ?, ?)', [
+      const { phone, address, donor_type } = req.body || {};
+      await pool.query('INSERT INTO Donor (user_id, donor_name, email, phone, address, donor_type) VALUES (?, ?, ?, ?, ?, ?)', [
         userId,
         name || null,
         email,
+        phone || null,
+        address || null,
+        donor_type || null,
+      ]);
+    } else if (role === 'volunteer') {
+      const { phone, area_of_service, availability_status } = req.body || {};
+      await pool.query('INSERT INTO Volunteer (user_id, volunteer_name, email, phone, area_of_service, availability_status) VALUES (?, ?, ?, ?, ?, ?)', [
+        userId,
+        name || null,
+        email,
+        phone || null,
+        area_of_service || null,
+        availability_status || 'Available',
       ]);
     } else if (role === 'shelter') {
-      await pool.query('INSERT INTO Shelter (user_id, shelter_name, email) VALUES (?, ?, ?)', [userId, name || null, email]);
+      const { shelter_name, phone, location, capacity, current_occupancy, food_stock_status } = req.body || {};
+      console.log('Shelter data:', { shelter_name, phone, location, capacity, current_occupancy, food_stock_status });
+      
+      await pool.query('INSERT INTO Shelter (user_id, shelter_name, email, phone, location, capacity, current_occupancy, food_stock_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
+        userId,
+        shelter_name || name || null,
+        email,
+        phone || null,
+        location || null,
+        capacity ? Number(capacity) : 0,
+        current_occupancy ? Number(current_occupancy) : 0,
+        food_stock_status || 'Adequate',
+      ]);
     }
-    // recipients/admin do not need extra table here
+    // admin does not need extra table here
 
     // issue tokens
     const accessToken = signAccessToken({ sub: userId, role });

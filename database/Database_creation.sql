@@ -36,8 +36,9 @@ CREATE TABLE Volunteer (
 CREATE TABLE Donation (
     donation_id SERIAL PRIMARY KEY,
     donor_id INT REFERENCES Donor(donor_id) ON DELETE CASCADE,
+    shelter_id INT REFERENCES Shelter(shelter_id) ON DELETE SET NULL,
     food_type VARCHAR(100) NOT NULL,
-    quantity INT CHECK (quantity > 0),
+    quantity VARCHAR(50) NOT NULL,
     expiry_date DATE,
     location TEXT,
     status VARCHAR(50) DEFAULT 'Pending',

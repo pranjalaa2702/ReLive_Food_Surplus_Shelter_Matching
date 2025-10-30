@@ -22,7 +22,6 @@ const Header = () => {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Donate", path: "/donate" },
     { name: "Requests", path: "/requests" },
     { name: "Volunteer", path: "/volunteer" },
     { name: "Shelters", path: "/shelters" },
@@ -36,32 +35,21 @@ const Header = () => {
       case 'admin':
         return [
           { name: "Admin Panel", path: "/admin" },
-          { name: "Dashboard", path: "/dashboard" },
         ];
       case 'donor':
         return [
-          { name: "Donor Dashboard", path: "/donor-dashboard" },
-          { name: "Dashboard", path: "/dashboard" },
+          { name: "My Dashboard", path: "/donor-dashboard" },
         ];
       case 'volunteer':
         return [
-          { name: "Volunteer Dashboard", path: "/volunteer-dashboard" },
-          { name: "Dashboard", path: "/dashboard" },
+          { name: "My Dashboard", path: "/volunteer-dashboard" },
         ];
       case 'shelter':
         return [
-          { name: "Shelter Dashboard", path: "/shelter-dashboard" },
-          { name: "Dashboard", path: "/dashboard" },
-        ];
-      case 'recipient':
-        return [
-          { name: "Recipient Dashboard", path: "/recipient-dashboard" },
-          { name: "Dashboard", path: "/dashboard" },
+          { name: "My Dashboard", path: "/shelter-dashboard" },
         ];
       default:
-        return [
-          { name: "Dashboard", path: "/dashboard" },
-        ];
+        return [];
     }
   };
 

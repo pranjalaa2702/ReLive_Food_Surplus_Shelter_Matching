@@ -1,14 +1,81 @@
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Clock, CheckCircle, MapPin, LogOut, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
+interface VolunteerInfo {
+  volunteer_name: string;
+  email: string;
+  phone: string;
+  area_of_service: string;
+  availability_status: string;
+  joined_at: string;
+}
+
+interface Task {
+  match_id: number;
+  donation_id: number | null;
+  request_id: number | null;
+  matched_on: string;
+  status: string;
+  shelter_name: string;
+  shelter_location: string;
+  request_food_type: string | null;
+  request_quantity: number | null;
+  request_unit: string | null;
+  donation_food_type: string | null;
+  donation_quantity: number | null;
+}
+
 const VolunteerDashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [volunteerInfo, setVolunteerInfo] = useState<VolunteerInfo | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchVolunteerData();
+  }, []);
+
+  const fetchVolunteerData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const [infoRes, tasksRes] = await Promise.all([
+        fetch(`${API_BASE}/api/volunteer/info`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_BASE}/api/volunteer/tasks`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      if (infoRes.ok) {
+        const infoData = await infoRes.json();
+        setVolunteerInfo(infoData.volunteer);
+      }
+
+      if (tasksRes.ok) {
+        const tasksData = await tasksRes.json();
+        setTasks(tasksData.tasks || []);
+      }
+    } catch (error) {
+      console.error('Error fetching volunteer data:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -19,43 +86,26 @@ const VolunteerDashboard = () => {
     }
   };
 
+  // Calculate stats from real data
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(t => t.status === 'Completed').length;
+  const pendingTasks = tasks.filter(t => t.status === 'Pending' || t.status === 'In Progress').length;
+  const uniqueShelters = new Set(tasks.map(t => t.shelter_name)).size;
+
   const volunteerStats = [
-    { icon: Clock, label: "Hours Volunteered", value: "48", color: "text-blue-600" },
-    { icon: CheckCircle, label: "Tasks Completed", value: "23", color: "text-green-600" },
-    { icon: Users, label: "People Helped", value: "156", color: "text-purple-600" },
-    { icon: MapPin, label: "Active Locations", value: "5", color: "text-orange-600" },
+    { icon: Clock, label: "Total Tasks", value: totalTasks.toString(), color: "text-blue-600" },
+    { icon: CheckCircle, label: "Tasks Completed", value: completedTasks.toString(), color: "text-green-600" },
+    { icon: Users, label: "Shelters Helped", value: uniqueShelters.toString(), color: "text-purple-600" },
+    { icon: MapPin, label: "Active Tasks", value: pendingTasks.toString(), color: "text-orange-600" },
   ];
 
-  const upcomingTasks = [
-    {
-      id: 1,
-      title: "Food Distribution Helper",
-      location: "Downtown Community Center",
-      date: "Tomorrow, 9:00 AM",
-      duration: "3 hours",
-      status: "Scheduled",
-    },
-    {
-      id: 2,
-      title: "Meal Preparation Assistant",
-      location: "Hope Kitchen",
-      date: "Friday, 5:00 PM",
-      duration: "3 hours",
-      status: "Scheduled",
-    },
-    {
-      id: 3,
-      title: "Delivery Driver",
-      location: "Various Locations",
-      date: "Sunday, 10:00 AM",
-      duration: "4 hours",
-      status: "Pending",
-    },
-  ];
+  const upcomingTasks = tasks
+    .filter(t => t.status === 'Pending' || t.status === 'In Progress')
+    .slice(0, 5);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Scheduled":
+      case "In Progress":
         return "bg-blue-100 text-blue-700 border-blue-200";
       case "Pending":
         return "bg-yellow-100 text-yellow-700 border-yellow-200";
@@ -65,6 +115,48 @@ const VolunteerDashboard = () => {
         return "bg-muted text-muted-foreground";
     }
   };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  };
+
+  const getTaskTitle = (task: Task) => {
+    if (task.donation_food_type) return `Deliver ${task.donation_food_type}`;
+    if (task.request_food_type) return `Help with ${task.request_food_type}`;
+    return "Volunteer Task";
+  };
+
+  const getTaskDescription = (task: Task) => {
+    if (task.donation_food_type && task.donation_quantity) {
+      return `${task.donation_quantity} units of ${task.donation_food_type}`;
+    }
+    if (task.request_food_type && task.request_quantity && task.request_unit) {
+      return `${task.request_quantity} ${task.request_unit} of ${task.request_food_type}`;
+    }
+    return "Volunteer assistance needed";
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-12">
+          <div className="text-center">Loading...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -100,7 +192,7 @@ const VolunteerDashboard = () => {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Badge variant="secondary">VOLUNTEER</Badge>
             <span>•</span>
-            <span>{user?.email}</span>
+            <span>{volunteerInfo?.volunteer_name || user?.email}</span>
           </div>
         </div>
 
@@ -127,25 +219,33 @@ const VolunteerDashboard = () => {
               <Button variant="ghost" size="sm">View All</Button>
             </div>
             <div className="space-y-4">
-              {upcomingTasks.map((task) => (
-                <div key={task.id} className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <h3 className="font-medium text-foreground mb-2">{task.title}</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground mb-3">
-                    <p>📍 {task.location}</p>
-                    <p>📅 {task.date}</p>
-                    <p>⏱️ {task.duration}</p>
+              {upcomingTasks.length > 0 ? (
+                upcomingTasks.map((task) => (
+                  <div key={task.match_id} className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <h3 className="font-medium text-foreground mb-2">{getTaskTitle(task)}</h3>
+                    <div className="space-y-1 text-sm text-muted-foreground mb-3">
+                      <p>📍 {task.shelter_name} - {task.shelter_location}</p>
+                      <p>� {getTaskDescription(task)}</p>
+                      <p>📅 Matched {formatDate(task.matched_on)}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Badge className={getStatusColor(task.status)}>
+                        {task.status}
+                      </Badge>
+                      {task.status !== 'Completed' && (
+                        <Button size="sm" onClick={() => toast.info('Task completion feature coming soon!')}>
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Mark Complete
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={getStatusColor(task.status)}>
-                      {task.status}
-                    </Badge>
-                    <Button size="sm">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Mark Complete
-                    </Button>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No active tasks. Check the opportunities page to volunteer!
                 </div>
-              ))}
+              )}
             </div>
           </Card>
 
@@ -157,21 +257,37 @@ const VolunteerDashboard = () => {
               </h2>
             </div>
             <div className="space-y-4">
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/volunteer')}
+              >
                 <Calendar className="h-4 w-4 mr-2" />
                 Browse Opportunities
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => toast.info('Availability update feature coming soon!')}
+              >
                 <MapPin className="h-4 w-4 mr-2" />
                 Update Availability
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={fetchVolunteerData}
+              >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Log Hours
+                Refresh Data
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/shelters')}
+              >
                 <Users className="h-4 w-4 mr-2" />
-                Connect with Shelters
+                View Shelters ({uniqueShelters})
               </Button>
             </div>
           </Card>

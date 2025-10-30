@@ -5,9 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string;
+  unauthenticatedRedirectTo?: string; // default /auth
+  forbiddenRedirectTo?: string; // optional override
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole, unauthenticatedRedirectTo = "/auth", forbiddenRedirectTo }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
   const location = useLocation();
 
@@ -25,11 +27,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to={unauthenticatedRedirectTo} state={{ from: location }} replace />;
   }
 
   // Check role-based access if required
   if (requiredRole && user?.role !== requiredRole) {
+    if (forbiddenRedirectTo) {
+      return <Navigate to={forbiddenRedirectTo} state={{ from: location }} replace />;
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">

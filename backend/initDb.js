@@ -10,7 +10,7 @@ async function init() {
     name VARCHAR(200),
     email VARCHAR(200) UNIQUE NOT NULL,
     password_hash VARCHAR(200) NOT NULL,
-    role ENUM('donor','volunteer','shelter','recipient','admin') NOT NULL DEFAULT 'donor',
+    role ENUM('donor','volunteer','shelter','admin') NOT NULL DEFAULT 'donor',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -59,6 +59,97 @@ async function init() {
     food_stock_status VARCHAR(50) DEFAULT 'Adequate',
     registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS RequestFulfillments (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    request_id VARCHAR(100) NULL,
+    shelter_name VARCHAR(200) NULL,
+    request_type VARCHAR(200) NULL,
+    requested_quantity VARCHAR(100) NULL,
+    fulfill_quantity VARCHAR(100) NOT NULL,
+    notes TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS Request (
+    request_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    shelter_id BIGINT NOT NULL,
+    request_type VARCHAR(200) NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    urgency_level VARCHAR(20) DEFAULT 'Medium',
+    status VARCHAR(20) DEFAULT 'Open',
+    description TEXT NULL,
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (shelter_id) REFERENCES Shelter(shelter_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS Donation (
+    donation_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    donor_id BIGINT NOT NULL,
+    shelter_id BIGINT NULL,
+    food_type VARCHAR(200) NOT NULL,
+    quantity VARCHAR(100) NOT NULL,
+    expiry_date DATE NULL,
+    location TEXT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    donated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (donor_id) REFERENCES Donor(donor_id) ON DELETE CASCADE,
+    FOREIGN KEY (shelter_id) REFERENCES Shelter(shelter_id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS Matches (
+    match_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    donation_id BIGINT NULL,
+    request_id BIGINT NULL,
+    volunteer_id BIGINT NULL,
+    matched_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'Pending',
+    FOREIGN KEY (donation_id) REFERENCES Donation(donation_id) ON DELETE CASCADE,
+    FOREIGN KEY (request_id) REFERENCES Request(request_id) ON DELETE CASCADE,
+    FOREIGN KEY (volunteer_id) REFERENCES Volunteer(volunteer_id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS VolunteerOpportunity (
+    opportunity_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    shelter_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    task_type VARCHAR(100),
+    volunteers_needed INT DEFAULT 1,
+    volunteers_assigned INT DEFAULT 0,
+    date_needed DATE,
+    time_needed TIME,
+    duration_hours DECIMAL(4,2),
+    location TEXT,
+    urgency_level VARCHAR(20) DEFAULT 'Medium',
+    status VARCHAR(20) DEFAULT 'Open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (shelter_id) REFERENCES Shelter(shelter_id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS VolunteerAssignment (
+    assignment_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    opportunity_id BIGINT NOT NULL,
+    volunteer_id BIGINT NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'Assigned',
+    FOREIGN KEY (opportunity_id) REFERENCES VolunteerOpportunity(opportunity_id) ON DELETE CASCADE,
+    FOREIGN KEY (volunteer_id) REFERENCES Volunteer(volunteer_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_assignment (opportunity_id, volunteer_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  CREATE TABLE IF NOT EXISTS AuditLog (
+    audit_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_role VARCHAR(50),
+    action_type VARCHAR(100),
+    record_id BIGINT,
+    table_name VARCHAR(50),
+    action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description TEXT
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `;
 

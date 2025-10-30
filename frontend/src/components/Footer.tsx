@@ -16,7 +16,7 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              Connecting donors, shelters, recipients, and volunteers to redistribute surplus food 
+              Connecting donors, shelters, and volunteers to redistribute surplus food 
               and provide shelter aid efficiently across communities.
             </p>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
@@ -45,8 +45,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/donate" className="text-muted-foreground hover:text-primary transition-colors">
-                  Donate Food
+                <Link to="/requests" className="text-muted-foreground hover:text-primary transition-colors">
+                  Browse Requests
                 </Link>
               </li>
               <li>
@@ -72,8 +72,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
-                  Dashboard
+                <Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">
+                  Login / Sign Up
                 </Link>
               </li>
               <li>

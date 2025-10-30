@@ -59,12 +59,6 @@ export const useRoleBasedAPI = () => {
     return makeAuthenticatedRequest('/api/shelter/requests');
   };
 
-  // Recipient API calls
-  const getRecipientShelters = async () => {
-    if (user?.role !== 'recipient') throw new Error('Recipient access required');
-    return makeAuthenticatedRequest('/api/recipient/shelters');
-  };
-
   return {
     loading,
     error,
@@ -78,7 +72,5 @@ export const useRoleBasedAPI = () => {
     getVolunteerTasks,
     // Shelter
     getShelterRequests,
-    // Recipient
-    getRecipientShelters,
   };
 };
