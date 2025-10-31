@@ -33,6 +33,9 @@ interface Task {
   request_unit: string | null;
   donation_food_type: string | null;
   donation_quantity: number | null;
+  date_needed?: string | null;
+  time_needed?: string | null;
+  duration_hours?: number | null;
 }
 
 const VolunteerDashboard = () => {
@@ -49,7 +52,7 @@ const VolunteerDashboard = () => {
   const fetchVolunteerData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       
       const [infoRes, tasksRes] = await Promise.all([
         fetch(`${API_BASE}/api/volunteer/info`, {
@@ -89,7 +92,7 @@ const VolunteerDashboard = () => {
   // Calculate stats from real data
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === 'Completed').length;
-  const pendingTasks = tasks.filter(t => t.status === 'Pending' || t.status === 'In Progress').length;
+  const pendingTasks = tasks.filter(t => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Assigned').length;
   const uniqueShelters = new Set(tasks.map(t => t.shelter_name)).size;
 
   const volunteerStats = [
@@ -100,7 +103,11 @@ const VolunteerDashboard = () => {
   ];
 
   const upcomingTasks = tasks
-    .filter(t => t.status === 'Pending' || t.status === 'In Progress')
+    .filter(t => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Assigned')
+    .slice(0, 5);
+
+  const recentCompletedTasks = tasks
+    .filter(t => t.status === 'Completed')
     .slice(0, 5);
 
   const getStatusColor = (status: string) => {
@@ -109,6 +116,8 @@ const VolunteerDashboard = () => {
         return "bg-blue-100 text-blue-700 border-blue-200";
       case "Pending":
         return "bg-yellow-100 text-yellow-700 border-yellow-200";
+      case "Assigned":
+        return "bg-purple-100 text-purple-700 border-purple-200";
       case "Completed":
         return "bg-green-100 text-green-700 border-green-200";
       default:
@@ -292,6 +301,41 @@ const VolunteerDashboard = () => {
             </div>
           </Card>
         </div>
+
+        {/* Completed Tasks Section */}
+        {recentCompletedTasks.length > 0 && (
+          <Card className="p-6 mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading font-semibold text-2xl text-foreground">
+                Recently Completed Tasks
+              </h2>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                {completedTasks} Total Completed
+              </Badge>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentCompletedTasks.map((task) => (
+                <div key={task.match_id} className="p-4 bg-green-50/50 rounded-lg border border-green-200">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-medium text-foreground">{getTaskTitle(task)}</h3>
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  </div>
+                  <div className="space-y-1 text-sm text-muted-foreground mb-3">
+                    <p className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {task.shelter_name}
+                    </p>
+                    <p>📦 {getTaskDescription(task)}</p>
+                    <p className="text-xs">✓ Completed {formatDate(task.matched_on)}</p>
+                  </div>
+                  <Badge className={getStatusColor(task.status)}>
+                    Completed
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </main>
 
       <Footer />

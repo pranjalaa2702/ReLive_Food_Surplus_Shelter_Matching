@@ -33,6 +33,7 @@ DROP TRIGGER IF EXISTS after_request_insert;
 DROP TRIGGER IF EXISTS before_shelter_occupancy_update;
 DROP TRIGGER IF EXISTS after_request_update;
 DROP TRIGGER IF EXISTS before_volunteer_opportunity_update;
+DROP TRIGGER IF EXISTS before_volunteer_assignment_insert;
 
 -- Step 5: Drop existing procedures if any
 SELECT 'Dropping existing procedures (if any)...' as Step;
@@ -41,12 +42,15 @@ DROP PROCEDURE IF EXISTS MatchDonationToRequest;
 DROP PROCEDURE IF EXISTS GetDonorImpact;
 DROP PROCEDURE IF EXISTS GetVolunteerTaskSummary;
 DROP PROCEDURE IF EXISTS UpdateRequestQuantity;
+DROP PROCEDURE IF EXISTS CleanupExpiredOpportunities;
+DROP PROCEDURE IF EXISTS UpdateCompletedAssignments;
 
 -- Step 6: Drop existing functions if any
 SELECT 'Dropping existing functions (if any)...' as Step;
 DROP FUNCTION IF EXISTS GetOccupancyPercentage;
 DROP FUNCTION IF EXISTS CountActiveRequests;
 DROP FUNCTION IF EXISTS IsVolunteerAvailable;
+DROP FUNCTION IF EXISTS IsOpportunityExpired;
 
 -- Step 7: Verify cleanup
 SELECT 'Cleanup complete. Ready to install triggers, procedures, and functions.' as Status;

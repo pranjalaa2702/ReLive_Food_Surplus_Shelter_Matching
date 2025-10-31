@@ -352,11 +352,60 @@ app.use(cors());
         }
         const volunteerId = volRows[0].volunteer_id;
 
-        const [rows] = await pool.query(
-          `SELECT m.*, 
-                  s.shelter_name, s.location as shelter_location,
-                  r.food_type as request_food_type, r.quantity as request_quantity, r.unit as request_unit,
-                  d.food_type as donation_food_type, d.quantity as donation_quantity
+        // Update assignment status based on date/time
+        await pool.query(`
+          UPDATE VolunteerAssignment va
+          JOIN VolunteerOpportunity vo ON va.opportunity_id = vo.opportunity_id
+          SET va.status = 'Completed'
+          WHERE va.volunteer_id = ?
+          AND va.status = 'Assigned'
+          AND vo.date_needed IS NOT NULL
+          AND CONCAT(vo.date_needed, ' ', IFNULL(vo.time_needed, '23:59:59')) < NOW()
+        `, [volunteerId]);
+
+        // Fetch volunteer assignments (from volunteer opportunities)
+        const [assignments] = await pool.query(
+          `SELECT 
+                  va.assignment_id as match_id,
+                  NULL as donation_id,
+                  NULL as request_id,
+                  va.assigned_at as matched_on,
+                  va.status,
+                  s.shelter_name,
+                  s.location as shelter_location,
+                  vo.title as request_food_type,
+                  NULL as request_quantity,
+                  vo.task_type as request_unit,
+                  NULL as donation_food_type,
+                  NULL as donation_quantity,
+                  vo.date_needed,
+                  vo.time_needed,
+                  vo.duration_hours
+           FROM VolunteerAssignment va
+           JOIN VolunteerOpportunity vo ON va.opportunity_id = vo.opportunity_id
+           JOIN Shelter s ON vo.shelter_id = s.shelter_id
+           WHERE va.volunteer_id = ?
+           ORDER BY va.assigned_at DESC`,
+          [volunteerId]
+        );
+
+        // Fetch matches (from donation/request matching)
+        const [matches] = await pool.query(
+          `SELECT m.match_id, 
+                  m.donation_id,
+                  m.request_id,
+                  m.matched_on,
+                  m.status,
+                  s.shelter_name, 
+                  s.location as shelter_location,
+                  r.request_type as request_food_type, 
+                  r.quantity as request_quantity, 
+                  r.unit as request_unit,
+                  d.food_type as donation_food_type, 
+                  d.quantity as donation_quantity,
+                  NULL as date_needed,
+                  NULL as time_needed,
+                  NULL as duration_hours
            FROM Matches m
            LEFT JOIN Donation d ON m.donation_id = d.donation_id
            LEFT JOIN Request r ON m.request_id = r.request_id
@@ -365,7 +414,10 @@ app.use(cors());
            ORDER BY m.matched_on DESC`,
           [volunteerId]
         );
-        res.json({ tasks: rows });
+
+        // Combine both types of tasks
+        const allTasks = [...assignments, ...matches];
+        res.json({ tasks: allTasks });
       } catch (error) {
         console.error('Error fetching volunteer tasks:', error);
         res.status(500).json({ error: 'Server error' });
@@ -515,11 +567,18 @@ app.use(cors());
     app.get('/api/volunteer-opportunities', async (req, res) => {
       try {
         const pool = await getPool();
+        
+        // First, cleanup expired opportunities
+        await pool.query('CALL CleanupExpiredOpportunities()');
+        
+        // Then fetch only non-expired opportunities
         const [rows] = await pool.query(
           `SELECT vo.*, s.shelter_name, s.location as shelter_location, s.phone as shelter_phone, s.email as shelter_email
            FROM VolunteerOpportunity vo
            JOIN Shelter s ON vo.shelter_id = s.shelter_id
-           WHERE vo.status = 'Open'
+           WHERE vo.status IN ('Open', 'Filled')
+           AND (vo.date_needed IS NULL OR 
+                CONCAT(vo.date_needed, ' ', IFNULL(vo.time_needed, '23:59:59')) >= NOW())
            ORDER BY 
              CASE vo.urgency_level
                WHEN 'Urgent' THEN 1
@@ -546,6 +605,9 @@ app.use(cors());
           return res.status(404).json({ error: 'Shelter profile not found' });
         }
         const shelterId = shelterRows[0].shelter_id;
+
+        // Cleanup expired opportunities
+        await pool.query('CALL CleanupExpiredOpportunities()');
 
         const [rows] = await pool.query(
           'SELECT * FROM VolunteerOpportunity WHERE shelter_id = ? ORDER BY created_at DESC',
@@ -962,6 +1024,18 @@ app.use(cors());
         res.json({ active_requests: rows[0].active_requests });
       } catch (error) {
         console.error('Error fetching active requests count:', error);
+        res.status(500).json({ error: 'Server error' });
+      }
+    });
+
+    // Endpoint to manually cleanup expired volunteer opportunities
+    app.post('/api/admin/cleanup-expired-opportunities', authenticate, authorize(['admin']), async (req, res) => {
+      try {
+        const pool = await getPool();
+        await pool.query('CALL CleanupExpiredOpportunities()');
+        res.json({ message: 'Expired opportunities cleaned up successfully' });
+      } catch (error) {
+        console.error('Error cleaning up expired opportunities:', error);
         res.status(500).json({ error: 'Server error' });
       }
     });

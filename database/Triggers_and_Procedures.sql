@@ -286,3 +286,98 @@ BEGIN
     RETURN availability = 'Available';
 END//
 DELIMITER ;
+
+-- ============================================
+-- PROCEDURES & TRIGGERS FOR EXPIRED OPPORTUNITIES
+-- ============================================
+
+-- Procedure: Clean up expired volunteer opportunities
+DELIMITER //
+CREATE PROCEDURE CleanupExpiredOpportunities()
+BEGIN
+    -- Mark opportunities as 'Expired' if the date_needed has passed
+    UPDATE VolunteerOpportunity
+    SET status = 'Expired'
+    WHERE status IN ('Open', 'Filled')
+    AND date_needed IS NOT NULL
+    AND CONCAT(date_needed, ' ', IFNULL(time_needed, '23:59:59')) < NOW();
+    
+    -- Optionally, delete expired opportunities older than 7 days
+    DELETE FROM VolunteerOpportunity
+    WHERE status = 'Expired'
+    AND date_needed IS NOT NULL
+    AND date_needed < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
+END//
+DELIMITER ;
+
+-- Procedure: Update volunteer assignment statuses to completed
+DELIMITER //
+CREATE PROCEDURE UpdateCompletedAssignments()
+BEGIN
+    -- Mark assignments as 'Completed' if the volunteer opportunity date/time has passed
+    UPDATE VolunteerAssignment va
+    JOIN VolunteerOpportunity vo ON va.opportunity_id = vo.opportunity_id
+    SET va.status = 'Completed'
+    WHERE va.status = 'Assigned'
+    AND vo.date_needed IS NOT NULL
+    AND CONCAT(vo.date_needed, ' ', IFNULL(vo.time_needed, '23:59:59')) < NOW();
+END//
+DELIMITER ;
+
+-- Trigger: Prevent applications to expired opportunities
+DELIMITER //
+CREATE TRIGGER before_volunteer_assignment_insert
+BEFORE INSERT ON VolunteerAssignment
+FOR EACH ROW
+BEGIN
+    DECLARE opp_date DATE;
+    DECLARE opp_time TIME;
+    DECLARE opp_status VARCHAR(20);
+    
+    -- Get opportunity details
+    SELECT date_needed, time_needed, status
+    INTO opp_date, opp_time, opp_status
+    FROM VolunteerOpportunity
+    WHERE opportunity_id = NEW.opportunity_id;
+    
+    -- Check if opportunity has expired
+    IF opp_date IS NOT NULL AND 
+       CONCAT(opp_date, ' ', IFNULL(opp_time, '23:59:59')) < NOW() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot apply to expired volunteer opportunity';
+    END IF;
+    
+    -- Check if opportunity is already filled or expired
+    IF opp_status IN ('Filled', 'Expired', 'Cancelled') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot apply to filled, expired, or cancelled opportunity';
+    END IF;
+END//
+DELIMITER ;
+
+-- Function: Check if opportunity is expired
+DELIMITER //
+CREATE FUNCTION IsOpportunityExpired(opportunity_id_param BIGINT)
+RETURNS BOOLEAN
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE opp_date DATE;
+    DECLARE opp_time TIME;
+    
+    SELECT date_needed, time_needed
+    INTO opp_date, opp_time
+    FROM VolunteerOpportunity
+    WHERE opportunity_id = opportunity_id_param;
+    
+    IF opp_date IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    
+    IF CONCAT(opp_date, ' ', IFNULL(opp_time, '23:59:59')) < NOW() THEN
+        RETURN TRUE;
+    END IF;
+    
+    RETURN FALSE;
+END//
+DELIMITER ;

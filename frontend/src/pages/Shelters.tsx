@@ -140,7 +140,7 @@ const Shelters = () => {
                   </div>
 
                   {/* Occupancy Status */}
-                  <div className="mb-4">
+                  <div>
                     <div className="flex items-center justify-between text-sm mb-2">
                       <span className="text-muted-foreground">Occupancy</span>
                       <span className={`font-semibold ${getOccupancyColor(occupancyPercentage)}`}>
@@ -160,8 +160,6 @@ const Shelters = () => {
                       />
                     </div>
                   </div>
-
-                  <Button className="w-full">Contact Shelter</Button>
                 </Card>
               );
             })}
